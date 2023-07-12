@@ -2,9 +2,22 @@ import numpy as np
 import datetime as dt
 import pandas as pd
 import alphavantage.av as av
+import requests
+import json
 from scipy.stats import norm
 from optport import mv_solver
 from sdes import MultiGbm
+
+
+def get_stock_price(ticker):
+    url = f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/{ticker}?modules=price"
+    response = requests.get(url)
+    if response.headers['Content-Type'] == 'application/json':
+        data = json.loads(response.text)
+        price = data['quoteSummary']['result'][0]['price']['regularMarketPrice']['raw']
+        return price
+    else:
+        raise ValueError("Error: Unable to fetch stock price data.")
 
 
 def update_with_quotes(S, api):
@@ -21,7 +34,8 @@ def update_with_quotes(S, api):
     quotes = []
     # Loop over each ticker and get the current price quote
     for symbol in symbols:
-        quote = api.getYahooQuote(symbol)
+        # quote = api.getYahooQuote(symbol)
+        quote = get_stock_price(symbol)
         quotes.append(quote)
     # Create a new row with today's date and the quotes
     new_row = pd.DataFrame([quotes], columns=symbols, index=[today])
