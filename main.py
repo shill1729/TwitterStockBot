@@ -1,16 +1,21 @@
-# This is a sample Python script.
+import tweepy
+from allocator import portfolio_allocator
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+ema_filter = 0.05
+symbols = ["SPY", "VXX", "NIO"]
 
+# Authenticate to Twitter
+auth = tweepy.OAuthHandler("API_KEY", "API_KEY_SECRET")
+auth.set_access_token("ACCESS_TOKEN", "ACCESS_TOKEN_SECRET")
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+# Create API object
+api = tweepy.API(auth)
 
+# Download stock data and compute optimal allocations
+w, g, mu, sigma, VaR = portfolio_allocator(symbols, ema_filter)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Create your tweet text
+tweet_text = f"Optimal allocation for today: {w}"
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Tweet
+api.update_status(status=tweet_text)
